@@ -1,0 +1,68 @@
+{
+  "permissions": {
+    "deny": [
+      "Edit(/memory/ORG.md)",
+      "Edit(/memory/STEERING.md)",
+      "Edit(/memory/INDEX.md)",
+      "Edit(/memory/CHANGELOG.md)",
+      "Edit(/memory/project/**)",
+      "Edit(/memory/dreams/*-applied.json)",
+      "Edit(~/agent-memory/*/ORG.md)",
+      "Edit(~/agent-memory/*/STEERING.md)",
+      "Edit(~/agent-memory/*/INDEX.md)",
+      "Edit(~/agent-memory/*/CHANGELOG.md)",
+      "Edit(~/agent-memory/*/project/**)",
+      "Edit(~/agent-memory/*/dreams/*-applied.json)",
+      "Edit(/.claude/commands/dream.md)",
+      "Edit(/.claude/dream-apply.md)",
+      "Bash(chflags *)"
+    ],
+    "allow": [
+      "Bash(python3 scripts/memwrite.py *)",
+      "Bash(python3 scripts/collect_transcripts.py)",
+      "Bash(python3 scripts/collect_transcripts.py *)",
+      "Bash(git -C memory log *)",
+      "Bash(git -C memory rm *)",
+      "Bash(python3 scripts/memcheck.py)",
+      "Bash(python3 scripts/memcheck.py *)",
+      "Bash(python3 scripts/dream_finish.py)",
+      "Bash(python3 scripts/dream_finish.py *)",
+      "Bash(python3 scripts/dream_due.py)",
+      "Bash(python3 scripts/dream_due.py --json)",
+      "Bash(python3 scripts/dream_owner.py alive)",
+      "Bash(python3 scripts/dream_proposal.py)",
+      "Bash(python3 scripts/dream_proposal.py applied)",
+      "Bash(python3 scripts/dream_proposal.py applied *)",
+      "Bash(python3 scripts/dream_proposal.py declined)",
+      "Bash(python3 scripts/dream_proposal.py declined *)",
+      "Bash(python3 scripts/past.py *)",
+      "Bash(python3 scripts/archive.py)",
+      "Bash(python3 scripts/proposal_check.py)",
+      "Bash(python3 scripts/proposal_check.py *)",
+      "Bash(python3 scripts/machine_check.py)",
+      "Bash(python3 scripts/repo_look.py *)",
+      "Edit(/memory/agents/**)",
+      "Edit(/memory/inbox/**)",
+      "Edit(~/agent-memory/*/agents/**)",
+      "Edit(~/agent-memory/*/inbox/**)"
+    ]
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [{ "type": "command", "command": "python3 \"$CLAUDE_PROJECT_DIR/scripts/guard_memory.py\"" }]
+      }
+    ],
+    "SessionStart": [
+      {
+        "hooks": [{ "type": "command", "command": "python3 \"$CLAUDE_PROJECT_DIR/scripts/memory_context.py\"" }]
+      }
+    ],
+    "SubagentStart": [
+      {
+        "hooks": [{ "type": "command", "command": "python3 \"$CLAUDE_PROJECT_DIR/scripts/memory_context.py\"" }]
+      }
+    ]
+  }
+}

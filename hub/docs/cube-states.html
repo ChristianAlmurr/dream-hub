@@ -1,0 +1,47 @@
+<!doctype html>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cube states</title>
+<!-- Every status the hub's cube can show, at the sizes the hub draws it (14 in the sidebar and jump list, 16 in the
+     queue, the pane strip and peek), on the two grounds it sits on. Open it straight from disk. -->
+<link rel="stylesheet" href="../ui/app.css">
+<style>
+  body { overflow: auto; padding: 24px; }
+  h1 { font-size: 15px; font-weight: 500; margin-bottom: 4px; }
+  p { color: var(--soft); margin: 0 0 16px; }
+  table { border-collapse: collapse; }
+  th { color: var(--faint); font: 400 12px var(--mono); text-align: left; padding: 4px 16px 4px 0; }
+  td { padding: 6px 16px 6px 0; vertical-align: middle; }
+  td.on-panel { background: var(--panel); padding-left: 12px; }
+  .cell { display: inline-flex; width: 20px; height: 20px; align-items: center; justify-content: center; }
+  .big svg { width: 48px; height: 48px; }
+  .word { color: var(--ink); } .why { color: var(--faint); font-size: 13px; }
+  .still .cube rect { animation: none !important; }
+  .still .cube-build .late, .still .cube-turn .late, .still .cube-settle .late { opacity: .2; }
+  .still .cube-shimmer .late { opacity: .5; }
+  .still .cube-lift .top { transform: translateY(-1px); }
+</style>
+<h1>The hub's status cube, every state</h1>
+<p>Sizes as drawn in the hub: 14 and 16 on the ground (sidebar), 16 on a card (Home's queue), 48 to read the pixels. The last column is the reduced-motion still.</p>
+<table id="sheet"><tr><th>state</th><th>14</th><th>16</th><th>16 on a card</th><th>zoomed</th><th>still</th><th></th></tr></table>
+<script src="../ui/orbs.js"></script>
+<script>
+  const STATES = [
+    ["working", "Working: builds pixel by pixel"], ["using", "Using a tool"], ["searching", "Searching"], ["reasoning", "Thinking: turns face by face"],
+    ["compacting", "Compacting: settles from the top"], ["closing", "Closing: writing its handoff"], ["background", "Working in the background"],
+    ["needs", "Needs you: the lid lifts"], ["finished", "Done: still, top face lit"], ["idle", "Idle: still and solid"], ["shell", "Terminal"],
+    ["no-claude", "Claude isn't running"], ["ended", "Ended: outline"], ["closed", "Closed: outline"], ["offline", "Not connected: outline"],
+    ["error", "Error: a block has fallen"], ["retrying", "Retrying: the fallen block blinks"], ["dreaming", "Dreaming (a project): shimmers"],
+  ];
+  const sheet = document.getElementById("sheet");
+  const cell = (state, size, cls = "") => { const td = document.createElement("td"); td.className = cls; const box = document.createElement("span"); box.className = "cell"; box.append(hubOrb(state, { size })); td.append(box); return td; };
+  for (const [state, why] of STATES) {
+    const tr = document.createElement("tr");
+    const name = document.createElement("td"); name.className = "word"; name.textContent = state;
+    const big = cell(state, 16, "big"); big.querySelector(".cell").style.cssText = "width:52px;height:52px";
+    const still = cell(state, 16, "still");
+    const note = document.createElement("td"); note.className = "why"; note.textContent = why;
+    tr.append(name, cell(state, 14), cell(state, 16), cell(state, 16, "on-panel"), big, still, note);
+    sheet.append(tr);
+  }
+</script>

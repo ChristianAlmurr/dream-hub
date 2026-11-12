@@ -1,0 +1,33 @@
+#!/bin/sh
+# amk: the one way into the agent memory kit. `amk help` lists the verbs; scripts/amk.py runs them.
+# This file only chooses the Python and gives the process over to it (exec): no second process, so a signal sent
+# to amk reaches the script, and what the script exits with is what amk exits with. In this order:
+#   1. the one on record in ~/.config/agent-memory/interpreter, which `amk interpreter record` writes: the real
+#      program, not a launcher, so it does not depend on Xcode's /usr/bin/python3 being able to start;
+#   2. /usr/bin/python3, the one a launchd job gets on a Mac;
+#   3. the first python3 on the PATH, for a machine that has no /usr/bin/python3.
+# It can start only one, so it takes the one on record only when that can be told to work without starting it:
+# it is a program (a file that may be executed), `record` tested it (the record's second line says so), and it has
+# not changed since (it is not newer than the record). Otherwise it says why in one line and goes on with the next.
+self=$0
+while [ -L "$self" ]; do  # called through a link: the kit is where the file really is
+  to=$(readlink "$self"); case $to in /*) self=$to ;; *) self=${self%/*}/$to ;; esac
+done
+case $self in */*) kit=${self%/*}/.. ;; *) kit=.. ;; esac
+record=$HOME/.config/agent-memory/interpreter
+python=; tested=; why=
+[ -r "$record" ] && { read -r python; read -r tested; } < "$record"
+if [ -n "$python" ]; then
+  if [ ! -f "$python" ] || [ ! -x "$python" ]; then why="is not a program that can be started"
+  else case $tested in
+    tested*) [ "$python" -nt "$record" ] && why="has changed since it was put on record" ;;
+    *) why="was not put on record by \`amk interpreter record\`, which tests it first" ;;
+  esac; fi
+  if [ -n "$why" ]; then
+    echo "amk: the Python on record, $python, $why; going on with another. \`amk interpreter record\` records one again." >&2
+    python=
+  fi
+fi
+[ -n "$python" ] || { [ -x /usr/bin/python3 ] && python=/usr/bin/python3; }
+[ -n "$python" ] || python=$(command -v python3) || { echo "amk: no Python to run under: none on record, no /usr/bin/python3 and no python3 on the PATH." >&2; exit 78; }
+exec "$python" "$kit/scripts/amk.py" "$@"
