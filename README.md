@@ -369,4 +369,4 @@ Grotesk and JetBrains Mono (SIL Open Font License 1.1); their licences are in `h
 
 ## Licence
 
-[MIT](LICENSE).
+[MIT](LICENSE). Third-party files keep their own licences: see [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
